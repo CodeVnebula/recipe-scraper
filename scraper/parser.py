@@ -2,9 +2,11 @@ from typing import Generator
 
 from bs4 import BeautifulSoup, ResultSet, Tag
 from config import KULINARIA_URL
-from utils.helper import replace_numbers
+from utils.helper import ScraperHelper
 
 import json
+
+scraper_helper = ScraperHelper()
 
 
 class MainPageParser:
@@ -88,8 +90,8 @@ class RecipeParser:
             image = data.get('image')
             description = data.get('description')
             author = data.get('author')
-            recipe_ingredients = data.get('recipeIngredient')
-            recipe_instructions = data.get('recipeInstructions', '')
+            recipe_ingredients = scraper_helper.replace_numbers(data.get('recipeIngredient', []))
+            recipe_instructions = scraper_helper.index_steps(data.get('recipeInstructions', ''))
             servings = data.get('recipeYield')
             if servings:
                 servings = servings.split(' loaf')[0]
@@ -122,15 +124,17 @@ class RecipeParser:
                         ingredient.text.strip()
                     )
 
-                recipe_ingredients = replace_numbers(recipe_ingredients)
+                recipe_ingredients = scraper_helper.replace_numbers(recipe_ingredients)
 
             recipe_instructions = []
             if line_list := self.__soup.select('.lineList > div'):
                 for index, l in enumerate(line_list):
-                    step = index + 1 if (count := l.select_one('.count')) is None else replace_numbers(count.text)[0]
+                    step = index + 1 if (count := l.select_one('.count')) is None else scraper_helper.replace_numbers(
+                        count.text
+                    )[0]
 
                     recipe_instructions.append(
-                        (int(step), replace_numbers(l.find('p').text)[0])
+                        (int(step), scraper_helper.replace_numbers(l.find('p').text)[0])
                     )
 
         if not return_all_data:
