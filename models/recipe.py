@@ -37,3 +37,17 @@ class Recipe(ABC):
             dict: The recipe represented as a dictionary.
         """
         pass
+    
+    @classmethod
+    @abstractmethod
+    def from_dict(cls, recipe_dict: dict):
+        """
+        Create a Recipe object from a dictionary.
+        
+        Args:
+            recipe_dict (dict): The dictionary representation of the recipe.
+            
+        Returns:
+            Recipe: The Recipe object.
+        """
+        pass
