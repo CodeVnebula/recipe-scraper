@@ -76,7 +76,6 @@ class ConcreteRecipe(Recipe):
         self.ingredients = ingredients
         self.steps = steps
 
-    @classmethod
     def to_dict(self) -> dict:
         """Converts the Recipe object to a dictionary for MongoDB storage."""
         return {
