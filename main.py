@@ -1,7 +1,8 @@
 import asyncio
-import time, json
+import time
+import json
 
-from scraper.scraper import RecipeScraper
+from scraper import RecipeScraper
 from config import COMEULI_CATEGORY_URL
 
 

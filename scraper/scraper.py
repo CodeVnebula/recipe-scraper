@@ -30,14 +30,18 @@ class RecipeScraper:
 
         if post_data.get('recipe_url'):
             await self.print('Scraping post', post_data.get('recipe_url'))
-            detailed_data = await self._fetch_recipe_details(post_data.get('recipe_url'), return_all_data=True)
+            detailed_data = await self._fetch_recipe_details(post_data.get('recipe_url'), return_all_data=False)
             post_data.update(detailed_data)
 
         return post_data
 
     async def _fetch_recipe_details(self, recipe_url: str | bytes, return_all_data: bool = True) -> dict:
         """Fetch recipe details from the recipe URL."""
-        html = await self._fetch_html(recipe_url)
+        try:
+            html = await self._fetch_html(recipe_url)
+        except aiohttp.client_exceptions:
+            return {}
+
         soup = RecipeParser(html)
 
         return soup.parse(return_all_data=return_all_data)
@@ -55,7 +59,12 @@ class RecipeScraper:
 
             await self.print('Scraping page', current_page_url)
 
-            main_html = await self._fetch_html(current_page_url)
+            try:
+                main_html = await self._fetch_html(current_page_url)
+            except aiohttp.client_exceptions:
+                await self.print('Failed to scrape page', current_page_url)
+                continue
+
             soup = MainPageParser(main_html)
 
             posts = soup.get_posts()

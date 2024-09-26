@@ -2,7 +2,7 @@ from typing import Generator
 
 from bs4 import BeautifulSoup, ResultSet, Tag
 from config import KULINARIA_URL
-from utils.helper import ScraperHelper
+from utils import ScraperHelper
 
 import json
 
@@ -35,8 +35,10 @@ class MainPageParser:
             recipe_url = KULINARIA_URL + recipe_url
 
         image_url = post.select_one('.box__img img').attrs.get('src')
+        if image_url:
+            image_url = KULINARIA_URL + image_url
 
-        description = post.select_one('.box__desc').text.strip()
+        description = post.select_one('.box__desc').get_text().strip()
 
         author = post.select_one('.name a').text.strip()
 
@@ -118,13 +120,13 @@ class RecipeParser:
                         break
 
             recipe_ingredients = []
-            if recipe_ingredient_tag := self.__soup.select_one('.list'):
-                for ingredient in recipe_ingredient_tag.find('div', recursive=False):
+            if recipe_ingredient_tag := self.__soup.select('.list__item'):
+                for ingredient in recipe_ingredient_tag:
                     recipe_ingredients.append(
                         ingredient.text.strip()
                     )
 
-                recipe_ingredients = scraper_helper.replace_numbers(recipe_ingredients)
+                recipe_ingredients = [x for x in scraper_helper.replace_numbers(recipe_ingredients) if x]
 
             recipe_instructions = []
             if line_list := self.__soup.select('.lineList > div'):
@@ -150,6 +152,7 @@ class RecipeParser:
             if description is not None:
                 metadata['description'] = description
             if author:
+                author = author.replace('ავტორი:', '').strip()
                 metadata['author'] = author
 
             metadata['servings'] = servings
@@ -163,6 +166,7 @@ class RecipeParser:
             if recipe_url is not None:
                 recipe_url = "https://" + recipe_url.attrs.get('content')
 
+            author = author.replace('ავტორი:', '').strip()
             return dict(
                 title=post_title,
                 recipe_url=recipe_url,
