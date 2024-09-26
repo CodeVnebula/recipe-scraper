@@ -79,7 +79,7 @@ recipe_scraper/
 
 ## Contribution
 
-This project is a collaborative effort between me and [CodeVnebula](https://github.com/CodeVnebula).
+This project is a collaborative effort between [Luka Goguadze](https://github.com/lukagoguadze2/recipe-scraper) and [CodeVnebula](https://github.com/CodeVnebula).
 
 
 ## Acknowledgments
