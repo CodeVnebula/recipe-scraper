@@ -9,6 +9,8 @@ async def main():
 
     with open('recipes.json', 'r', encoding='utf-8') as file:
         recipes_data = json.load(file)
+    
+    await db.drop_collection()
 
     recipes = []
     for recipe_data in recipes_data:
@@ -24,13 +26,10 @@ async def main():
             ingredients=recipe_data["ingredients"],
             steps=recipe_data["steps"]
         )
+        
+        await db.save_recipe(recipe)
+        print(f"Recipe saved id: {recipe.id}")
         recipes.append(recipe)
-
-    await db.save_recipes(recipes)
-    
-    # recipe = await db.get_recipe("<>")
-    # if recipe:
-    #     print(recipe.to_dict())
 
     print("Success")
 if __name__ == '__main__':
