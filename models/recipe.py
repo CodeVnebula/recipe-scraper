@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 from textwrap import dedent
+from utils.helper import get_id_from_url
+
 
 class Recipe(ABC):
     @abstractmethod
@@ -66,6 +68,7 @@ class ConcreteRecipe(Recipe):
                  servings: int, 
                  ingredients: list, 
                  steps: list):
+        self.id = None
         self.title = title
         self.recipe_url = recipe_url
         self.main_category = main_category
@@ -76,13 +79,11 @@ class ConcreteRecipe(Recipe):
         self.servings = servings
         self.ingredients = ingredients
         self.steps = steps
-        self.id = self.__get_id()
-    
+
+        self.__get_id()
+
     def __get_id(self):
-        custom_id = self.recipe_url.split("_")[-1].split("/")[0]
-        if custom_id.isdigit():
-            return int(custom_id)
-        return None
+        self.id = get_id_from_url(self.recipe_url)
         
     def to_dict(self) -> dict:
         """Converts the Recipe object to a dictionary for MongoDB storage."""

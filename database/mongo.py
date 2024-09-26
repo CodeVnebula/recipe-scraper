@@ -1,6 +1,7 @@
 from motor.motor_asyncio import AsyncIOMotorClient
 from models.recipe import ConcreteRecipe
 
+
 class MongoDB:
     """Base class for MongoDB operations using Motor for async MongoDB access."""
 

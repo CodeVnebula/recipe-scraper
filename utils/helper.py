@@ -1,6 +1,12 @@
 import re
 
 
+def get_id_from_url(url: str) -> int | None:
+    custom_id = url.split("_")[-1].split("/")[0]
+    if custom_id.isdigit():
+        return int(custom_id)
+
+
 class ScraperHelper(object):
     float_pattern = re.compile(r'\b\d+\.\d+\b')
     indexing_pattern = re.compile(r'(\d+)\.\s(.*?)(?=\n\d+\.|\Z)', re.DOTALL)
