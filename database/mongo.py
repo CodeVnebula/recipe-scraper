@@ -31,8 +31,9 @@ class MongoDB:
     async def save_recipe(self, concrete_recipe: ConcreteRecipe):
         """Save a single recipe asynchronously to the MongoDB database."""
         concrete_recipe_dict = concrete_recipe.to_dict()
-        _id = await self.collection.insert_one(concrete_recipe_dict) 
-        return _id
+        if concrete_recipe_dict['_id'] is None:
+            del concrete_recipe_dict['_id']
+        await self.collection.insert_one(concrete_recipe_dict) 
 
     async def get_all_recipes(self):
         """Retrieve all recipes asynchronously."""
