@@ -44,8 +44,8 @@ class MainPageParser:
 
         return dict(
                 title=recipe_title,
-                recipe_url=recipe_url,
                 image_url=image_url,
+                recipe_url=recipe_url,
                 description=description,
                 author=author,
             )
@@ -148,7 +148,7 @@ class RecipeParser:
             if post_title is not None:
                 metadata['title'] = post_title
             if image:
-                metadata['image'] = image
+                metadata['image_url'] = image
             if description is not None:
                 metadata['description'] = description
             if author:

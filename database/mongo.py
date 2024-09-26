@@ -1,5 +1,5 @@
 from motor.motor_asyncio import AsyncIOMotorClient
-from models.recipe import ConcreteRecipe
+from models import ConcreteRecipe
 
 
 class MongoDB:
@@ -49,4 +49,3 @@ class MongoDB:
     async def drop_collection(self):
         """Drop all documents from the collection."""
         await self.collection.drop()
-    

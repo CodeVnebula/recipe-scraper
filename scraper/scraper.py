@@ -9,7 +9,7 @@ from utils.helper import get_id_from_url
 
 
 class RecipeScraper:
-    def __init__(self, category_url: str, page_limit: int | None = None):
+    def __init__(self, category_url: str, page_limit: int | None = None, db: MongoDB = None):
         self.page_limit = page_limit
         self.category_url = category_url
         self._page_number = 1
@@ -18,7 +18,7 @@ class RecipeScraper:
         self._tasks = []
         self.__lock = asyncio.Lock()
 
-        self.__db = MongoDB(MONGO_URI, DATABASE_NAME)
+        self.__db = db if db else MongoDB(MONGO_URI, DATABASE_NAME)
 
     async def print(self, *args, **kwargs) -> None:
         async with self.__lock:
