@@ -35,7 +35,7 @@
      <string notr="true">background: #4A4947; </string>
     </property>
     <property name="currentIndex">
-     <number>2</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="table_page">
      <widget class="QLabel" name="label_3">
@@ -174,6 +174,20 @@
          <weight>75</weight>
          <bold>true</bold>
         </font>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string notr="true">_id</string>
+       </property>
+       <property name="font">
+        <font>
+         <stylestrategy>NoAntialias</stylestrategy>
+         <kerning>true</kerning>
+        </font>
+       </property>
+       <property name="textAlignment">
+        <set>AlignLeading|AlignBottom</set>
        </property>
       </column>
      </widget>
@@ -402,7 +416,7 @@ p, li { white-space: pre-wrap; }
        </font>
       </property>
       <property name="styleSheet">
-       <string notr="true">color: white</string>
+       <string notr="true">color: white;</string>
       </property>
       <property name="frameShape">
        <enum>QFrame::Box</enum>
@@ -566,7 +580,7 @@ p, li { white-space: pre-wrap; }
        <enum>QFrame::NoFrame</enum>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="default_details_page">
        <widget class="QLabel" name="recipe_image_label">
@@ -1004,8 +1018,9 @@ p, li { white-space: pre-wrap; }
        </rect>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>3</number>
       </property>
+      <widget class="QWidget" name="default_stats_page"/>
       <widget class="QWidget" name="author_with_most_recipes_page">
        <widget class="QLabel" name="label_17">
         <property name="geometry">
@@ -1226,7 +1241,7 @@ p, li { white-space: pre-wrap; }
         <property name="font">
          <font>
           <family>Calibri</family>
-          <pointsize>10</pointsize>
+          <pointsize>12</pointsize>
          </font>
         </property>
         <property name="styleSheet">
@@ -1240,12 +1255,6 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="text">
          <string/>
-        </property>
-        <property name="openExternalLinks">
-         <bool>true</bool>
-        </property>
-        <property name="textInteractionFlags">
-         <set>Qt::LinksAccessibleByKeyboard|Qt::LinksAccessibleByMouse|Qt::TextBrowserInteraction|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
         </property>
        </widget>
       </widget>
@@ -1316,7 +1325,7 @@ p, li { white-space: pre-wrap; }
    <widget class="QPushButton" name="stats_button">
     <property name="geometry">
      <rect>
-      <x>50</x>
+      <x>60</x>
       <y>530</y>
       <width>170</width>
       <height>50</height>
@@ -1500,6 +1509,66 @@ p, li { white-space: pre-wrap; }
     </property>
     <property name="format">
      <string>%p%</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="extra_info_button">
+    <property name="geometry">
+     <rect>
+      <x>910</x>
+      <y>630</y>
+      <width>170</width>
+      <height>50</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Calibri</family>
+      <pointsize>10</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background: #6EC207; color: white;</string>
+    </property>
+    <property name="text">
+     <string>დეტალურად</string>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>20</width>
+      <height>20</height>
+     </size>
+    </property>
+   </widget>
+   <widget class="QLabel" name="selected_recipe_label">
+    <property name="geometry">
+     <rect>
+      <x>439</x>
+      <y>630</y>
+      <width>461</width>
+      <height>50</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Calibri</family>
+      <pointsize>16</pointsize>
+      <weight>50</weight>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: white;</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="textFormat">
+     <enum>Qt::AutoText</enum>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
     </property>
    </widget>
   </widget>

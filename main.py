@@ -27,13 +27,13 @@ async def mystatistics():
 
 async def main():
     db = MongoDB(uri=MONGO_URI, db_name=DATABASE_NAME)
-    await db.drop_collection()
+    # await db.drop_collection()
     db.client.close()
     app = QApplication(sys.argv)
     loop = QEventLoop(app)
     asyncio.set_event_loop(loop)
     window = Application()
-    window.show()
+    await window.show()
     with loop:
         loop.run_forever()
 
