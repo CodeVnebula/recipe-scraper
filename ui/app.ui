@@ -616,7 +616,7 @@ p, li { white-space: pre-wrap; }
        <enum>QFrame::NoFrame</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="default_details_page">
        <widget class="QLabel" name="recipe_image_label">
@@ -775,6 +775,9 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="text">
          <string/>
+        </property>
+        <property name="textInteractionFlags">
+         <set>Qt::LinksAccessibleByKeyboard|Qt::LinksAccessibleByMouse|Qt::TextBrowserInteraction|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
         </property>
        </widget>
       </widget>
@@ -1294,6 +1297,12 @@ p, li { white-space: pre-wrap; }
           <width>371</width>
           <height>51</height>
          </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">color: white;</string>
+        </property>
+        <property name="openExternalLinks">
+         <bool>true</bool>
         </property>
        </widget>
       </widget>
