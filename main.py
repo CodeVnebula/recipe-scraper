@@ -24,32 +24,16 @@ async def mystatistics():
     return avg_steps, avg_ingredients, most_active_author, most_servings_recipe
 
 
-async def setup_app():
-    db = MongoDB(uri=MONGO_URI, db_name=DATABASE_NAME)
-    await db.drop_collection()  # Clear existing data if necessary
-    _scraper = RecipeScraper(
-        category_url=COMEULI_CATEGORY_URL,
-        page_limit=None,
-        db=db
-    )
-
-    return _scraper, db
-
 async def main():
-    # Initialize QApplication and event loop
+    db = MongoDB(uri=MONGO_URI, db_name=DATABASE_NAME)
+    scraper = RecipeScraper(COMEULI_CATEGORY_URL,None, db)
     app = QApplication(sys.argv)
     loop = QEventLoop(app)
     asyncio.set_event_loop(loop)
-
-    # Set up the application and scrape data
-    _scraper, db = await setup_app()
-    
-    window = Application(_scraper, db)
+    window = Application(scraper, db)
     window.show()
-
-    # Start the application loop
     with loop:
-        app.exec_()  # Just call exec_() without await
+        loop.run_forever()
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     asyncio.run(main())
