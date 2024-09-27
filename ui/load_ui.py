@@ -151,11 +151,11 @@ class Application(QMainWindow):
         self.stats_stackedWidget.setCurrentWidget(self.most_servings_recipe_page)
         most_servings_recipe = await self.statistics.recipe_with_most_servings()
         self.recipe_name_stats_label.setText(most_servings_recipe.get('recipe_title', 'No data yet'))
-        self.recipe_url_stats_label.setText(most_servings_recipe.get('recipe_url', 'No data yet'))
+        self.recipe_url_stats_text.setText(most_servings_recipe.get('recipe_url', 'No data yet'))
 
     def show_default_stats_page(self):
         self.recipe_name_stats_label.setText('')
-        self.recipe_url_stats_label.setText('')
+        self.recipe_url_stats_text.setText('')
         self.stats_stackedWidget.setCurrentWidget(self.most_servings_recipe_page)
 
     @asyncSlot()
