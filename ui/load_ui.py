@@ -16,6 +16,7 @@ import os
 from config import CATEGORIES
 from scraper import RecipeScraper
 from database.mongo import MongoDB
+from database.statistics import Statistics
 from qasync import asyncSlot
 
 from config import MONGO_URI, DATABASE_NAME, COMEULI_CATEGORY_URL
@@ -61,9 +62,8 @@ class Application(QMainWindow):
         self.avg_steps_button = self.findChild(QPushButton, "avg_steps_button")
         self.avg_ingredients_button = self.findChild(QPushButton, "avg_ingredients_button")
         self.most_servings_button = self.findChild(QPushButton, "most_servings_button")
-        self.default_stats_page = self.findChild(QWidget, "default_stats_page")
         self.author_with_most_recipes_page = self.findChild(QWidget, "author_with_most_recipes_page")
-        self.avg_pages = self.findChild(QWidget, "avg_pages")
+        self.avg_page = self.findChild(QWidget, "avg_page")
         self.most_servings_recipe_page = self.findChild(QWidget, "most_servings_recipe_page")
         self.author_name_label = self.findChild(QLabel, "author_name_label")
         self.avg_label = self.findChild(QLabel, "avg_label")
@@ -78,13 +78,50 @@ class Application(QMainWindow):
         self.start_scrape_button.clicked.connect(self.start_scrape)
         self.main_window_button.clicked.connect(self.show_table_page)
         self.stats_button.clicked.connect(self.show_stats_page)
-        
-    def show_stats_page(self):
-        self.stackedWidget.setCurrentWidget(self.stats)
     
+    
+    def show_stats_page(self):
+        db = MongoDB(uri=MONGO_URI, db_name=DATABASE_NAME)
+        self.statistics = Statistics(db)
+        self.stackedWidget.setCurrentWidget(self.stats)
+        self.stats_stackedWidget.setCurrentWidget(self.default_stats_page)
+        self.default_stats_button.clicked.connect(self.show_default_stats_page)
+        self.most_recipes_author_button.clicked.connect(self.show_author_with_most_recipes_page)
+        self.avg_steps_button.clicked.connect(self.show_avg_steps_page)
+        self.avg_ingredients_button.clicked.connect(self.show_avg_ingredients_page)
+        self.most_servings_button.clicked.connect(self.show_most_servings_page)
+    
+    @asyncSlot()
+    async def show_avg_steps_page(self):
+        self.stats_stackedWidget.setCurrentWidget(self.avg_page)
+        avg_steps = await self.statistics.average_steps_per_recipe()
+        self.avg_label.setText(f"{avg_steps:.2f}")
+        
+    @asyncSlot()
+    async def show_avg_ingredients_page(self):
+        self.stats_stackedWidget.setCurrentWidget(self.avg_page)
+        avg_ingredients = await self.statistics.average_ingredients_per_recipe()
+        self.avg_label.setText(f"{avg_ingredients:.2f}")
+    
+    @asyncSlot()
+    async def show_most_servings_page(self):
+        self.stats_stackedWidget.setCurrentWidget(self.most_servings_recipe_page)
+        most_servings_recipe = await self.statistics.recipe_with_most_servings()
+        self.recipe_name_stats_label.setText(most_servings_recipe.get('recipe_title', 'No data yet'))
+        self.recipe_url_stats_label.setText(most_servings_recipe.get('recipe_url', 'No data yet'))
+        
+    def show_default_stats_page(self):
+        self.stats_stackedWidget.setCurrentWidget(self.most_recipes_author_page)
+        
+    @asyncSlot()
+    async def show_author_with_most_recipes_page(self):
+        self.stats_stackedWidget.setCurrentWidget(self.author_with_most_recipes_page)
+        author_name = await self.statistics.most_active_author()
+        self.author_name_label.setText(author_name.get('author', 'No data yet'))  
+        
     def show_table_page(self):
         self.stackedWidget.setCurrentWidget(self.table_page)
-    
+        
     @asyncSlot()
     async def start_scrape(self):
         db = MongoDB(uri=MONGO_URI, db_name=DATABASE_NAME)

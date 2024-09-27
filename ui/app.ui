@@ -35,7 +35,7 @@
      <string notr="true">background: #4A4947; </string>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>2</number>
     </property>
     <widget class="QWidget" name="table_page">
      <widget class="QLabel" name="label_3">
@@ -107,7 +107,7 @@
        <bool>false</bool>
       </property>
       <attribute name="horizontalHeaderVisible">
-       <bool>true</bool>
+       <bool>false</bool>
       </attribute>
       <attribute name="horizontalHeaderCascadingSectionResizes">
        <bool>false</bool>
@@ -401,6 +401,9 @@ p, li { white-space: pre-wrap; }
         <pointsize>12</pointsize>
        </font>
       </property>
+      <property name="styleSheet">
+       <string notr="true">color: white</string>
+      </property>
       <property name="frameShape">
        <enum>QFrame::Box</enum>
       </property>
@@ -563,7 +566,7 @@ p, li { white-space: pre-wrap; }
        <enum>QFrame::NoFrame</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="default_details_page">
        <widget class="QLabel" name="recipe_image_label">
@@ -1001,9 +1004,8 @@ p, li { white-space: pre-wrap; }
        </rect>
       </property>
       <property name="currentIndex">
-       <number>3</number>
+       <number>0</number>
       </property>
-      <widget class="QWidget" name="default_stats_page"/>
       <widget class="QWidget" name="author_with_most_recipes_page">
        <widget class="QLabel" name="label_17">
         <property name="geometry">
@@ -1224,7 +1226,7 @@ p, li { white-space: pre-wrap; }
         <property name="font">
          <font>
           <family>Calibri</family>
-          <pointsize>12</pointsize>
+          <pointsize>10</pointsize>
          </font>
         </property>
         <property name="styleSheet">
@@ -1238,6 +1240,12 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="text">
          <string/>
+        </property>
+        <property name="openExternalLinks">
+         <bool>true</bool>
+        </property>
+        <property name="textInteractionFlags">
+         <set>Qt::LinksAccessibleByKeyboard|Qt::LinksAccessibleByMouse|Qt::TextBrowserInteraction|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
         </property>
        </widget>
       </widget>
@@ -1308,7 +1316,7 @@ p, li { white-space: pre-wrap; }
    <widget class="QPushButton" name="stats_button">
     <property name="geometry">
      <rect>
-      <x>60</x>
+      <x>50</x>
       <y>530</y>
       <width>170</width>
       <height>50</height>
