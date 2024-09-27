@@ -2,6 +2,8 @@ import aiohttp
 import asyncio
 
 from bs4 import Tag
+
+from models import ConcreteRecipe
 from scraper.parser import MainPageParser, RecipeParser
 from config import DATABASE_NAME, MONGO_URI
 from database import MongoDB
@@ -47,6 +49,8 @@ class RecipeScraper:
 
             detailed_data = await self._fetch_recipe_details(recipe_url, return_all_data=False)
             post_data.update(detailed_data)
+
+            await self.__db.save_recipe(ConcreteRecipe.from_dict(post_data))
 
         return post_data
 

@@ -1,7 +1,6 @@
 import time
 import asyncio
 
-from models import ConcreteRecipe
 from database import MongoDB, Statistics
 from config import MONGO_URI, DATABASE_NAME
 from scraper import RecipeScraper
@@ -56,14 +55,6 @@ async def main():
     recipes_data = await _scraper.scrape_recipes()
     end_time = time.perf_counter() - start
    
-    recipes = []
-    for recipe_data in recipes_data:
-        recipe = ConcreteRecipe.from_dict(recipe_data)
-        
-        await db.save_recipe(recipe)
-        print(f"Recipe saved id: {recipe.id}")
-        recipes.append(recipe)
-
     print()
     print(len(recipes_data), "recipes scraped")
     print(f"Found {_scraper.exists_in_db} existing recipes in database")
