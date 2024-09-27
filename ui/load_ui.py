@@ -1,6 +1,5 @@
 from PyQt5.QtWidgets import (
     QMainWindow, 
-    QApplication,
     QWidget,
     QStackedWidget,
     QComboBox,
@@ -13,22 +12,17 @@ from PyQt5.QtWidgets import (
     QListWidget
 )
 from PyQt5 import uic
-import sys
 import os
 from config import CATEGORIES
 from scraper import RecipeScraper
-from models.recipe import ConcreteRecipe
 from database.mongo import MongoDB
 from qasync import asyncSlot
-import asyncio
 
 from config import MONGO_URI, DATABASE_NAME, COMEULI_CATEGORY_URL
 
 
 class Application(QMainWindow):
     def __init__(self):
-        self.semaphore = asyncio.Semaphore(3)
-        
         super(Application, self).__init__()
         ui_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "app.ui")
         uic.loadUi(ui_file, self) 
@@ -101,7 +95,7 @@ class Application(QMainWindow):
         _scraper.recipe_count_function = self.recipe_amount.setText
 
         self.progressBar.setValue(0)
-        recipes_data = await _scraper.scrape_recipes()
+        await _scraper.scrape_recipes()
         all_recipes = await db.get_all_recipes()
         db.client.close()
 
@@ -114,18 +108,15 @@ class Application(QMainWindow):
     def add_row_to_table(self, recipe_data: dict):
         if not all(key in recipe_data for key in ('title', 'author', 'servings', 'recipe_url')):
             print("Missing fields in recipe data")
-            return  
-        
+            return
+
+        servings = recipe_data.get('servings', '')
+        servings = 0 if servings is None else str(servings)
+
         row = self.tableWidget.rowCount() 
         self.tableWidget.insertRow(row)    
 
         self.tableWidget.setItem(row, 0, QTableWidgetItem(recipe_data.get('title', '')))
         self.tableWidget.setItem(row, 1, QTableWidgetItem(recipe_data.get('author', '')))
-        self.tableWidget.setItem(row, 2, QTableWidgetItem(recipe_data.get('servings', '')))
+        self.tableWidget.setItem(row, 2, QTableWidgetItem(servings))
         self.tableWidget.setItem(row, 3, QTableWidgetItem(recipe_data.get('recipe_url', '')))
-        
-        
-        
-    
-
-
