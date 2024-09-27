@@ -23,6 +23,7 @@ async def mystatistics():
     
     return avg_steps, avg_ingredients, most_active_author, most_servings_recipe
 
+
 async def setup_app():
     db = MongoDB(uri=MONGO_URI, db_name=DATABASE_NAME)
     await db.drop_collection()  # Clear existing data if necessary
