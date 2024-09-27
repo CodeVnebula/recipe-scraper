@@ -35,7 +35,7 @@
      <string notr="true">background: #4A4947; </string>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="table_page">
      <widget class="QLabel" name="label_3">
@@ -107,7 +107,7 @@
        <bool>false</bool>
       </property>
       <attribute name="horizontalHeaderVisible">
-       <bool>false</bool>
+       <bool>true</bool>
       </attribute>
       <attribute name="horizontalHeaderCascadingSectionResizes">
        <bool>false</bool>
@@ -190,6 +190,30 @@
         <set>AlignLeading|AlignBottom</set>
        </property>
       </column>
+     </widget>
+     <widget class="QPushButton" name="delete_button">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>10</y>
+        <width>101</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>Calibri</family>
+        <pointsize>12</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background: red; color: white;</string>
+      </property>
+      <property name="text">
+       <string>წაშლა</string>
+      </property>
      </widget>
     </widget>
     <widget class="QWidget" name="recipe_details_page">

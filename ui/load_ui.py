@@ -44,6 +44,7 @@ class Application(QMainWindow):
         self.details_button: QPushButton = self.findChild(QPushButton, "extra_info_button")
         self.details_label: QLabel = self.findChild(QLabel, "selected_recipe_label")
         self.selected_item_id: int | None = None
+        self.delete_button: QPushButton = self.findChild(QPushButton, "delete_button")
         
         self.table_page: QWidget = self.findChild(QWidget, "table_page")
         self.recipe_details_page: QWidget = self.findChild(QWidget, "recipe_details_page")
@@ -94,6 +95,8 @@ class Application(QMainWindow):
         self.details_button.clicked.connect(self.show_details_page)
 
         self.tableWidget.setColumnHidden(4, True)
+
+        self.delete_button.clicked.connect(self.on_delete_button)
 
     def on_item_clicked(self, item):
         row = item.row()
@@ -167,7 +170,7 @@ class Application(QMainWindow):
         _scraper.recipe_count_function = self.recipe_amount.setText
 
         self.progressBar.setValue(0)
-        # await _scraper.scrape_recipes()
+        await _scraper.scrape_recipes()
         all_recipes = await db.get_all_recipes()
         db.client.close()
 
@@ -183,6 +186,7 @@ class Application(QMainWindow):
         all_recipes = await db.get_all_recipes()
         db.client.close()
 
+        self.clear_rows()
         for recipe in all_recipes:
             self.add_row_to_table(recipe.to_dict())
 
@@ -212,3 +216,12 @@ class Application(QMainWindow):
     async def show(self):
         await self.load_data_from_database()
         super().show()
+
+    @asyncSlot()
+    async def on_delete_button(self):
+        await self.db.drop_collection()
+        await self.load_data_from_database()
+
+    def clear_rows(self):
+        while self.tableWidget.rowCount() > 0:
+            self.tableWidget.removeRow(0)
