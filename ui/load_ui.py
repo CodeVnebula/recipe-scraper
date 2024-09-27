@@ -20,12 +20,13 @@ from scraper import RecipeScraper
 from models.recipe import ConcreteRecipe
 from database.mongo import MongoDB
 from qasync import asyncSlot
-
+import asyncio
 
 class Application(QMainWindow):
     def __init__(self, _scraper: RecipeScraper, db: MongoDB):
         self._scraper = _scraper
         self.db = db
+        self.semaphore = asyncio.Semaphore(3)
         
         super(Application, self).__init__()
         ui_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "app.ui")
@@ -104,23 +105,20 @@ class Application(QMainWindow):
             current_progress = (index + 1) / total_recipes * 100
             self.progressBar.setValue(int(current_progress))
             
-            self.add_row_to_table(recipe_data)
             await self.db.save_recipe(recipe)
+            self.add_row_to_table(recipe_data)
         
         self.progressBar.setValue(100)
         self.recipe_amount.setText(f"{len(recipes)}")
         
     def add_row_to_table(self, recipe_data: dict):
-        # Check if recipe_data contains necessary fields before adding
         if not all(key in recipe_data for key in ('title', 'author', 'servings', 'recipe_url')):
             print("Missing fields in recipe data")
-            return  # Exit the function if data is incomplete
+            return  
+        
+        row = self.tableWidget.rowCount() 
+        self.tableWidget.insertRow(row)    
 
-        # Add recipe data to the current row in the table
-        row = self.tableWidget.rowCount()  # Get the current number of rows
-        self.tableWidget.insertRow(row)     # Insert a new row at the end
-
-        # Set the items in the new row based on recipe data
         self.tableWidget.setItem(row, 0, QTableWidgetItem(recipe_data.get('title', '')))
         self.tableWidget.setItem(row, 1, QTableWidgetItem(recipe_data.get('author', '')))
         self.tableWidget.setItem(row, 2, QTableWidgetItem(recipe_data.get('servings', '')))
