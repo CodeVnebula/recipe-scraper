@@ -2,6 +2,19 @@
 
 This project involves scraping recipes from [kulinaria.ge](https://kulinaria.ge) and storing them in a MongoDB database. The application extracts recipe details such as title, URL, categories, ingredients, and preparation steps. It also calculates statistics regarding the recipes stored in the database.
 
+## Branches
+
+- **Main Branch**: This branch includes a **PyQt5 UI** for interacting with the scraper, allowing users to manage the scraping process with a graphical user interface.
+- **No-UI Branch**: If you do not wish to use PyQt5, you can switch to the **no-ui** branch.
+
+To switch to the no-ui branch, use the following command:
+
+```bash
+git checkout no-ui
+```
+
+If you want to use the graphical interface, stay on the **main** branch (the default branch).
+
 ## Features
 
 - Scrape recipe data from a specified category on kulinaria.ge.
@@ -31,6 +44,12 @@ recipe_scraper/
 │   ├── __init__.py
 |   ├── parser.py          # Html parser
 │   └── scraper.py         # Recipe scraper
+│
+├── ui/                    # ui folder
+│   ├── icons/
+|   |  └──icon.png
+|   ├── app.ui            # ui file
+│   └── load_ui.py        # python ui file
 │
 ├── utils/
 │   ├── __init__.py
@@ -89,3 +108,4 @@ This project is a collaborative effort between [Luka Goguadze](https://github.co
 - [Python](https://www.python.org) for the programming language.
 - [asyncio](https://docs.python.org/3/library/asyncio.html) for enabling asynchronous programming in Python.
 - [Beautiful Soup 4 (bs4)](https://www.crummy.com/software/BeautifulSoup/bs4/doc/) for web scraping and parsing HTML.
+- [PyQt5](https://riverbankcomputing.com/software/pyqt/intro) for the GUI framework used to build the application's interface.
