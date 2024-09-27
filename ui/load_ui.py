@@ -1,7 +1,7 @@
 import asyncio
 
 from PyQt5.QtWidgets import (
-    QMainWindow, 
+    QMainWindow,
     QWidget,
     QStackedWidget,
     QComboBox,
@@ -13,6 +13,11 @@ from PyQt5.QtWidgets import (
     QTextBrowser,
     QListWidget
 )
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtCore import QUrl
+from PyQt5.QtGui import QIcon
+
+from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkRequest
 from PyQt5 import uic
 import os
 from config import CATEGORIES
@@ -22,17 +27,23 @@ from database.statistics import Statistics
 from qasync import asyncSlot
 
 from config import MONGO_URI, DATABASE_NAME, COMEULI_CATEGORY_URL
-
+from utils.helper import get_id_from_url
 
 class Application(QMainWindow):
     def __init__(self):
         super(Application, self).__init__()
+        icon_path = 'ui/icons/icon.png'
+        self.setWindowIcon(QIcon(icon_path))
 
         self.db = MongoDB(uri=MONGO_URI, db_name=DATABASE_NAME)
         self.statistics = Statistics(self.db)
+        self.manager = QNetworkAccessManager(self)
+        self.manager.finished.connect(self.on_image_downloaded)
+
+        self.recipe_data = None
 
         ui_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "app.ui")
-        uic.loadUi(ui_file, self) 
+        uic.loadUi(ui_file, self)
         self.stackedWidget: QStackedWidget = self.findChild(QStackedWidget, "stackedWidget")
         self.category_combobox: QComboBox = self.findChild(QComboBox, "category_combobox")
         self.start_scrape_button: QPushButton = self.findChild(QPushButton, "start_scrape_button")
@@ -45,11 +56,13 @@ class Application(QMainWindow):
         self.details_label: QLabel = self.findChild(QLabel, "selected_recipe_label")
         self.selected_item_id: int | None = None
         self.delete_button: QPushButton = self.findChild(QPushButton, "delete_button")
-        
+
         self.table_page: QWidget = self.findChild(QWidget, "table_page")
         self.recipe_details_page: QWidget = self.findChild(QWidget, "recipe_details_page")
-        
+
         """Recipe details widgets"""
+        self.loading_label: QLabel = self.findChild(QLabel, "loading_label")
+        self.details_stackedWidget: QStackedWidget = self.findChild(QStackedWidget, "details_stackedWidget")
         self.default_details_page: QWidget = self.findChild(QWidget, "default_details_page")
         self.category_page: QWidget = self.findChild(QWidget, "category_page")
         self.lists_page: QWidget = self.findChild(QWidget, "lists_page")
@@ -84,11 +97,11 @@ class Application(QMainWindow):
         self.default_stats_button: QPushButton = self.findChild(QPushButton, "default_stats_button")
 
         self.tableWidget.itemClicked.connect(self.on_item_clicked)
-        
+
         self.progressBar.setValue(0)
         self.stackedWidget.setCurrentWidget(self.table_page)
         self.category_combobox.addItems(CATEGORIES)
-        
+
         self.start_scrape_button.clicked.connect(self.start_scrape)
         self.main_window_button.clicked.connect(self.show_table_page)
         self.stats_button.clicked.connect(self.show_stats_page)
@@ -104,7 +117,10 @@ class Application(QMainWindow):
         _id = self.tableWidget.item(row, 4).text()
         title = self.tableWidget.item(row, 0).text()
 
-        self.selected_item_id = int(_id) if _id.isdigit() else None
+        temp = get_id_from_url(self.tableWidget.item(row, 3).text())
+
+        self.selected_item_id = temp if temp else _id if _id.isdigit() else None
+
         self.details_label.setText(title)
 
     def show_stats_page(self):
@@ -118,26 +134,25 @@ class Application(QMainWindow):
         self.avg_ingredients_button.clicked.connect(self.show_avg_ingredients_page)
         self.most_servings_button.clicked.connect(self.show_most_servings_page)
 
-    
     @asyncSlot()
     async def show_avg_steps_page(self):
         self.stats_stackedWidget.setCurrentWidget(self.avg_page)
         avg_steps = await self.statistics.average_steps_per_recipe()
         self.avg_label.setText(f"{avg_steps:.2f}")
-        
+
     @asyncSlot()
     async def show_avg_ingredients_page(self):
         self.stats_stackedWidget.setCurrentWidget(self.avg_page)
         avg_ingredients = await self.statistics.average_ingredients_per_recipe()
         self.avg_label.setText(f"{avg_ingredients:.2f}")
-    
+
     @asyncSlot()
     async def show_most_servings_page(self):
         self.stats_stackedWidget.setCurrentWidget(self.most_servings_recipe_page)
         most_servings_recipe = await self.statistics.recipe_with_most_servings()
         self.recipe_name_stats_label.setText(most_servings_recipe.get('recipe_title', 'No data yet'))
         self.recipe_url_stats_label.setText(most_servings_recipe.get('recipe_url', 'No data yet'))
-        
+
     def show_default_stats_page(self):
         self.recipe_name_stats_label.setText('')
         self.recipe_url_stats_label.setText('')
@@ -147,21 +162,72 @@ class Application(QMainWindow):
     async def show_author_with_most_recipes_page(self):
         self.stats_stackedWidget.setCurrentWidget(self.author_with_most_recipes_page)
         author_name = await self.statistics.most_active_author()
-        self.author_name_label.setText(author_name.get('author', 'No data yet'))  
-        
+        self.author_name_label.setText(author_name.get('author', 'No data yet'))
+
     def show_table_page(self):
         self.stackedWidget.setCurrentWidget(self.table_page)
         self.details_button.show()
         self.details_label.setText('')
+        self.selected_item_id = None
+        self.recipe_data = None
         self.details_label.show()
 
-    def show_details_page(self):
+    @asyncSlot()
+    async def show_details_page(self):
+        self.recipe_image_label.clear()
         self.stackedWidget.setCurrentWidget(self.recipe_details_page)
         self.details_button.hide()
         self.details_label.hide()
-    
+        self.recipe_data = await self.db.get_recipe(self.selected_item_id)
+        if not isinstance(self.recipe_data, tuple):
+            self.recipe_title.setText(self.recipe_data.title)
+            self.recipe_description.setText(self.recipe_data.description or '')
+            self.servings.setText(str(self.recipe_data.servings or ''))
+            self.recipe_id.setText(str(self.recipe_data.id))
+            self.details_stackedWidget.setCurrentWidget(self.default_details_page)
+            image_url = self.recipe_data.image_url
+            self.load_image_from_url(image_url)
+            self.main_categor_button.clicked.connect(self.show_category_page)
+            self.sub_category_button.clicked.connect(self.show_sub_category_page)
+            self.ingredients_button.clicked.connect(self.show_ingredients_lists_page)
+            self.steps_button.clicked.connect(self.show_steps_lists_page)
+
+    def show_category_page(self):
+        self.details_stackedWidget.setCurrentWidget(self.category_page)
+        self.category_title.setText(self.category_combobox.currentText())
+        self.url_label.setText(self.recipe_data.main_category['url'])
+
+    def show_sub_category_page(self):
+        self.details_stackedWidget.setCurrentWidget(self.category_page)
+        self.category_title.setText(self.recipe_data.sub_category['title'])
+        self.url_label.setText(self.recipe_data.sub_category['url'])
+
+    def show_ingredients_lists_page(self):
+        self.details_stackedWidget.setCurrentWidget(self.lists_page)
+        self.listWidget.clear()
+        self.listWidget.addItems(self.recipe_data.ingredients)
+
+    def show_steps_lists_page(self):
+        self.details_stackedWidget.setCurrentWidget(self.lists_page)
+        self.listWidget.clear()
+        self.listWidget.addItems(step_list[-1] for step_list in self.recipe_data.steps)
+
+    def load_image_from_url(self, url):
+        self.loading_label.show()
+        self.manager.get(QNetworkRequest(QUrl(url)))  # Correct QUrl usage
+
+    def on_image_downloaded(self, reply):
+        if reply.error() == reply.NoError:
+            pixmap = QPixmap()
+            pixmap.loadFromData(reply.readAll())
+            self.recipe_image_label.setPixmap(pixmap)
+            self.recipe_image_label.setScaledContents(True)  # Scale the image to fit the label
+            self.loading_label.hide()
+        else:
+            print("Error downloading the image")
+
     @asyncSlot()
-    async def start_scrape(self, scrape_data: bool = True):
+    async def start_scrape(self):
         db = MongoDB(uri=MONGO_URI, db_name=DATABASE_NAME)
         _scraper = RecipeScraper(COMEULI_CATEGORY_URL, None, db)
 
@@ -174,8 +240,7 @@ class Application(QMainWindow):
         all_recipes = await db.get_all_recipes()
         db.client.close()
 
-        for recipe in all_recipes:
-            self.add_row_to_table(recipe.to_dict())
+        await self.load_data_from_database()
 
         self.progressBar.setValue(100)
         self.recipe_amount.setText(f"{len(all_recipes)}")
@@ -198,10 +263,10 @@ class Application(QMainWindow):
             return
 
         servings = recipe_data.get('servings', '')
-        servings = 0 if servings is None else str(servings)
+        servings = str(0) if servings is None else str(servings)
 
-        row = self.tableWidget.rowCount() 
-        self.tableWidget.insertRow(row)    
+        row = self.tableWidget.rowCount()
+        self.tableWidget.insertRow(row)
 
         self.tableWidget.setItem(row, 0, QTableWidgetItem(recipe_data.get('title', '')))
         self.tableWidget.setItem(row, 1, QTableWidgetItem(recipe_data.get('author', '')))

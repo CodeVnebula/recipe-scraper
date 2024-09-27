@@ -6,9 +6,21 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1141</width>
-    <height>699</height>
+    <width>1150</width>
+    <height>700</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>1150</width>
+    <height>700</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>1150</width>
+    <height>700</height>
+   </size>
   </property>
   <property name="font">
    <font>
@@ -624,6 +636,27 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="text">
          <string/>
+        </property>
+       </widget>
+       <widget class="QLabel" name="loading_label">
+        <property name="geometry">
+         <rect>
+          <x>160</x>
+          <y>130</y>
+          <width>201</width>
+          <height>81</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>20</pointsize>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">color: white;</string>
+        </property>
+        <property name="text">
+         <string>იტვირთება...</string>
         </property>
        </widget>
       </widget>
@@ -1253,32 +1286,14 @@ p, li { white-space: pre-wrap; }
          <string>რეცეპტის მისამართი:</string>
         </property>
        </widget>
-       <widget class="QLabel" name="recipe_url_stats_label">
+       <widget class="QTextBrowser" name="recipe_url_stats_text">
         <property name="geometry">
          <rect>
           <x>270</x>
           <y>90</y>
-          <width>450</width>
-          <height>50</height>
+          <width>371</width>
+          <height>51</height>
          </rect>
-        </property>
-        <property name="font">
-         <font>
-          <family>Calibri</family>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">color: white;</string>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::Panel</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Raised</enum>
-        </property>
-        <property name="text">
-         <string/>
         </property>
        </widget>
       </widget>
