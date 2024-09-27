@@ -100,12 +100,16 @@ class Application(QMainWindow):
         _scraper.progressbar_function = self.progressBar.setValue
         _scraper.recipe_count_function = self.recipe_amount.setText
 
+        self.progressBar.setValue(0)
         recipes_data = await _scraper.scrape_recipes()
-
+        all_recipes = await db.get_all_recipes()
         db.client.close()
 
+        for recipe in all_recipes:
+            self.add_row_to_table(recipe.to_dict())
+
         self.progressBar.setValue(100)
-        self.recipe_amount.setText(f"{len(recipes_data)}")
+        self.recipe_amount.setText(f"{len(all_recipes)}")
 
     def add_row_to_table(self, recipe_data: dict):
         if not all(key in recipe_data for key in ('title', 'author', 'servings', 'recipe_url')):
