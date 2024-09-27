@@ -8,3 +8,7 @@ DATABASE_NAME = "recipe_db"
 
 KULINARIA_URL = "https://www.kulinaria.ge"
 COMEULI_CATEGORY_URL = KULINARIA_URL + "/receptebi/cat/comeuli/"
+
+CATEGORIES = [
+    'ცომეული',
+]
