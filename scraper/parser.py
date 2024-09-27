@@ -70,6 +70,7 @@ class RecipeParser:
 
     def parse(self, return_all_data: bool = True) -> dict:
         """Parse the HTML content of a recipe page."""
+        recipe_instructions = None
         post_title = self.__soup.select_one(".post__title")
         if post_title is not None:
             post_title = post_title.text.strip()
@@ -128,16 +129,19 @@ class RecipeParser:
 
                 recipe_ingredients = [x for x in scraper_helper.replace_numbers(recipe_ingredients) if x]
 
-            recipe_instructions = []
-            if line_list := self.__soup.select('.lineList > div'):
-                for index, l in enumerate(line_list):
-                    step = index + 1 if (count := l.select_one('.count')) is None else scraper_helper.replace_numbers(
-                        count.text
-                    )[0]
+        recipe_instructions_temp = []
+        if line_list := self.__soup.select('.lineList > div'):
+            for index, l in enumerate(line_list):
+                step = index + 1 if (count := l.select_one('.count')) is None else scraper_helper.replace_numbers(
+                    count.text
+                )[0]
 
-                    recipe_instructions.append(
-                        (int(step), scraper_helper.replace_numbers(l.find('p').text)[0])
-                    )
+                recipe_instructions_temp.append(
+                    (int(step), scraper_helper.replace_numbers(l.find('p').text)[0])
+                )
+
+        if recipe_instructions is None or len(recipe_instructions_temp) >= len(recipe_instructions):
+            recipe_instructions = recipe_instructions_temp
 
         if not return_all_data:
             metadata = dict(

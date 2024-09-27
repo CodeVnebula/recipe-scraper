@@ -37,8 +37,14 @@ async def mystatistics():
 
 async def main():
     db = MongoDB(uri=MONGO_URI, db_name=DATABASE_NAME)
-    
-    # await db.drop_collection()
+
+    while True:
+        drop_table = input("Do you want to drop existing table? (y/n): ").lower()
+        if drop_table in ['y', 'n']:
+            break
+
+    if drop_table == 'y':
+        await db.drop_collection()
 
     _scraper = RecipeScraper(
         category_url=COMEULI_CATEGORY_URL,
