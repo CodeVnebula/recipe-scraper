@@ -1,12 +1,13 @@
 import aiohttp
 import asyncio
+import math
 
 from bs4 import Tag
 from scraper.parser import MainPageParser, RecipeParser
 from config import DATABASE_NAME, MONGO_URI
 from database import MongoDB
 from utils.helper import get_id_from_url
-
+from models import ConcreteRecipe
 
 class RecipeScraper:
     def __init__(self, category_url: str, page_limit: int | None = None, db: MongoDB = None):
@@ -14,9 +15,13 @@ class RecipeScraper:
         self.category_url = category_url
         self._page_number = 1
         self.exists_in_db = 0
+        self.data_added_count = 0
         self._all_recipes = []
         self._tasks = []
         self.__lock = asyncio.Lock()
+        self.myfunction = None
+        self.progressbar_function = None
+        self.recipe_count_function = None
 
         self.__db = db if db else MongoDB(MONGO_URI, DATABASE_NAME)
 
@@ -47,6 +52,18 @@ class RecipeScraper:
 
             detailed_data = await self._fetch_recipe_details(recipe_url, return_all_data=False)
             post_data.update(detailed_data)
+            await self.__db.save_recipe(ConcreteRecipe.from_dict(post_data))
+
+            async with self.__lock:
+                self.data_added_count += 1
+                if self.myfunction is not None:
+                    self.myfunction(post_data)
+                if self.recipe_count_function is not None:
+                    self.recipe_count_function(str(self.data_added_count))
+                if self.progressbar_function is not None:
+                    self.progressbar_function(
+                        int(100 * (1 - math.exp(-0.03 * self.data_added_count)))
+                    )
 
         return post_data
 

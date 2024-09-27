@@ -10,6 +10,7 @@ from config import MONGO_URI, DATABASE_NAME
 from scraper import RecipeScraper
 from config import COMEULI_CATEGORY_URL
 
+
 async def mystatistics():
     db = MongoDB(uri=MONGO_URI, db_name=DATABASE_NAME)
     statistics = Statistics(db)
@@ -26,11 +27,12 @@ async def mystatistics():
 
 async def main():
     db = MongoDB(uri=MONGO_URI, db_name=DATABASE_NAME)
-    scraper = RecipeScraper(COMEULI_CATEGORY_URL,None, db)
+    await db.drop_collection()
+    db.client.close()
     app = QApplication(sys.argv)
     loop = QEventLoop(app)
     asyncio.set_event_loop(loop)
-    window = Application(scraper, db)
+    window = Application()
     window.show()
     with loop:
         loop.run_forever()

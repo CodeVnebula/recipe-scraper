@@ -22,10 +22,11 @@ from database.mongo import MongoDB
 from qasync import asyncSlot
 import asyncio
 
+from config import MONGO_URI, DATABASE_NAME, COMEULI_CATEGORY_URL
+
+
 class Application(QMainWindow):
-    def __init__(self, _scraper: RecipeScraper, db: MongoDB):
-        self._scraper = _scraper
-        self.db = db
+    def __init__(self):
         self.semaphore = asyncio.Semaphore(3)
         
         super(Application, self).__init__()
@@ -92,25 +93,20 @@ class Application(QMainWindow):
     
     @asyncSlot()
     async def start_scrape(self):
-        recipes_data = await self._scraper.scrape_recipes()
-        recipes = []
-        total_recipes = len(recipes_data)
-        
-        current_progress = 0
+        db = MongoDB(uri=MONGO_URI, db_name=DATABASE_NAME)
+        _scraper = RecipeScraper(COMEULI_CATEGORY_URL, None, db)
 
-        for index, recipe_data in enumerate(recipes_data):
-            recipe = ConcreteRecipe.from_dict(recipe_data)
-            recipes.append(recipe)
+        _scraper.myfunction = self.add_row_to_table
+        _scraper.progressbar_function = self.progressBar.setValue
+        _scraper.recipe_count_function = self.recipe_amount.setText
 
-            current_progress = (index + 1) / total_recipes * 100
-            self.progressBar.setValue(int(current_progress))
-            
-            await self.db.save_recipe(recipe)
-            self.add_row_to_table(recipe_data)
-        
+        recipes_data = await _scraper.scrape_recipes()
+
+        db.client.close()
+
         self.progressBar.setValue(100)
-        self.recipe_amount.setText(f"{len(recipes)}")
-        
+        self.recipe_amount.setText(f"{len(recipes_data)}")
+
     def add_row_to_table(self, recipe_data: dict):
         if not all(key in recipe_data for key in ('title', 'author', 'servings', 'recipe_url')):
             print("Missing fields in recipe data")
