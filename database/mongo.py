@@ -5,11 +5,11 @@ from models import ConcreteRecipe
 class MongoDB:
     """Base class for MongoDB operations using Motor for async MongoDB access."""
 
-    def __init__(self, uri: str, db_name: str):
+    def __init__(self, uri: str, db_name: str, table_name: str) -> None:
         """Initialize MongoDB client and database asynchronously."""
         self.client = AsyncIOMotorClient(uri)  
         self.db = self.client[db_name]
-        self.collection = self.db['recipes']
+        self.collection = self.db[table_name]
 
     async def save_recipes(self, recipes: list):
         """Save multiple recipes asynchronously to the MongoDB database."""

@@ -3,14 +3,15 @@ import asyncio
 import math
 
 from bs4 import Tag
-from scraper.parser import MainPageParser, RecipeParser
-from config import DATABASE_NAME, MONGO_URI
+from scraper.parser import MainPageParser, RecipeParser, get_recipe_ingredients
+from config import RECIPES_URL
 from database import MongoDB
 from utils.helper import get_id_from_url
 from models import ConcreteRecipe
 
+
 class RecipeScraper:
-    def __init__(self, category_url: str, page_limit: int | None = None, db: MongoDB = None):
+    def __init__(self, category_url: str, db: MongoDB | None, page_limit: int | None = None):
         self.page_limit = page_limit
         self.category_url = category_url
         self._page_number = 1
@@ -23,7 +24,7 @@ class RecipeScraper:
         self.progressbar_function = None
         self.recipe_count_function = None
 
-        self.__db = db if db else MongoDB(MONGO_URI, DATABASE_NAME)
+        self.__db = db
 
     async def print(self, *args, **kwargs) -> None:
         async with self.__lock:
@@ -122,3 +123,11 @@ class RecipeScraper:
         self._all_recipes = [data for data in recipes_data if data]
 
         return self._all_recipes
+
+
+async def get_recipe_categories() -> list[dict[str, str]]:
+    return get_recipe_ingredients(
+        await RecipeScraper('', None)._fetch_html(
+            RECIPES_URL
+        )
+    )

@@ -1,4 +1,4 @@
-import asyncio
+import os
 
 from PyQt5.QtWidgets import (
     QMainWindow,
@@ -19,7 +19,6 @@ from PyQt5.QtGui import QIcon
 
 from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkRequest
 from PyQt5 import uic
-import os
 from config import CATEGORIES
 from scraper import RecipeScraper
 from database.mongo import MongoDB
@@ -28,6 +27,8 @@ from qasync import asyncSlot
 
 from config import MONGO_URI, DATABASE_NAME, COMEULI_CATEGORY_URL
 from utils.helper import get_id_from_url
+from scraper.scraper import get_recipe_categories
+
 
 class Application(QMainWindow):
     def __init__(self):
@@ -35,7 +36,12 @@ class Application(QMainWindow):
         icon_path = 'ui/icons/icon.png'
         self.setWindowIcon(QIcon(icon_path))
 
-        self.db = MongoDB(uri=MONGO_URI, db_name=DATABASE_NAME)
+        self.category_list = []
+
+        self.table_name = 'comeuli'
+        self.scraper_category_url = COMEULI_CATEGORY_URL
+
+        self.db = MongoDB(uri=MONGO_URI, db_name=DATABASE_NAME, table_name=self.table_name)
         self.statistics = Statistics(self.db)
         self.manager = QNetworkAccessManager(self)
         self.manager.finished.connect(self.on_image_downloaded)
@@ -101,6 +107,7 @@ class Application(QMainWindow):
         self.progressBar.setValue(0)
         self.stackedWidget.setCurrentWidget(self.table_page)
         self.category_combobox.addItems(CATEGORIES)
+        self.category_combobox.currentIndexChanged[str].connect(self.on_category_selection_changed)
 
         self.start_scrape_button.clicked.connect(self.start_scrape)
         self.main_window_button.clicked.connect(self.show_table_page)
@@ -228,8 +235,8 @@ class Application(QMainWindow):
 
     @asyncSlot()
     async def start_scrape(self):
-        db = MongoDB(uri=MONGO_URI, db_name=DATABASE_NAME)
-        _scraper = RecipeScraper(COMEULI_CATEGORY_URL, None, db)
+        db = MongoDB(uri=MONGO_URI, db_name=DATABASE_NAME, table_name=self.table_name)
+        _scraper = RecipeScraper(category_url=self.scraper_category_url, db=db, page_limit=None)
 
         _scraper.myfunction = self.add_row_to_table
         _scraper.progressbar_function = self.progressBar.setValue
@@ -247,7 +254,7 @@ class Application(QMainWindow):
 
     @asyncSlot()
     async def load_data_from_database(self):
-        db = MongoDB(uri=MONGO_URI, db_name=DATABASE_NAME)
+        db = MongoDB(uri=MONGO_URI, db_name=DATABASE_NAME, table_name=self.table_name)
         all_recipes = await db.get_all_recipes()
         db.client.close()
 
@@ -280,6 +287,11 @@ class Application(QMainWindow):
 
     async def show(self):
         await self.load_data_from_database()
+        self.category_list = await get_recipe_categories()
+        self.category_combobox.addItems(
+            [category['category'] for category in self.category_list if category['category'] not in CATEGORIES]
+        )
+
         super().show()
 
     @asyncSlot()
@@ -290,3 +302,14 @@ class Application(QMainWindow):
     def clear_rows(self):
         while self.tableWidget.rowCount() > 0:
             self.tableWidget.removeRow(0)
+
+    def on_category_selection_changed(self, selected_category):
+        for category in self.category_list:
+            if selected_category == category['category']:
+                self.table_name = category['category_db_name']
+                self.scraper_category_url = category['category_url']
+                self.db.client.close()
+                self.db = self.db = MongoDB(uri=MONGO_URI, db_name=DATABASE_NAME, table_name=self.table_name)
+                self.statistics = Statistics(self.db)
+                self.load_data_from_database()
+                break

@@ -189,3 +189,20 @@ class RecipeParser:
 
     def __repr__(self) -> str:
         return f"RecipeParser({self.__soup.__str__()})"
+
+
+def get_recipe_ingredients(html: str) -> list[dict[str, str]]:
+    soup = BeautifulSoup(html, 'lxml')
+
+    urls = soup.select('.recipe__nav-body:last-child a')
+
+    if urls is None:
+        return []
+
+    return [
+        {
+            'category': url.text.strip(),
+            'category_url': KULINARIA_URL + url.attrs.get('href'),
+            'category_db_name': url.attrs.get('href').split('cat/')[1].replace('/', '')
+        } for url in urls
+    ]
